@@ -18,14 +18,6 @@
 __uint128_t hashes[NODES]	= {0};
 int count[NODES]	= {0};
 
-static inline int abs32 (int v) {
-	unsigned r;
-	int const mask = v >> (((sizeof (int)) * CHAR_BIT) - 1) ;
-
-	r = (v + mask) ^ mask;
-	return r;
-}
-
 static inline int rendezvous (__uint128_t *pool, uint64_t id) {
 	register int x, bin = 0;
 	register __uint128_t max = 0, cache;
@@ -52,19 +44,19 @@ int main (int argc, char **argv) {
 
 	fputs ("\n\n\n\n\n\n\n\n", stdout);
 
-	float avg = KEYS / NODES;
+	float avg = (float) KEYS / (float) NODES;
 
 	float mad = 0;
 	for (x = 0; x < NODES; x++) {
 		fprintf (stdout, "Bin %i\t: %i\n", x, count[x]);
-		mad += abs32 (count[x] - avg);
+		mad += abs ((float) count[x] - avg);
 	}
 
 	fputs ("\n\n\n\n\n\n\n\n", stdout);
 
 	fprintf (stdout, "avg: keys/bin\t= %f\n", avg);
 
-	mad /= NODES;
+	mad /= (float) NODES;
 	fprintf (stdout, "mad: keys/bin\t= %f\n", mad);
 
 	float moa = mad / avg;
