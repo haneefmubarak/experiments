@@ -2,7 +2,7 @@ rendezvous
 ==========
 
 An experiment on rendezvous hash distribution,
-to be used for in the implementation of [sfDB5].
+to be used for in the implementation of [sfDB5](https://github.com/haneefmubarak/sfDB5).
 
 Compile & Run
 -------------
@@ -147,12 +147,12 @@ means that the servers should in theory
 be balanced give or take 00.03 percent,
 which is phenomenal. Of course, this
 will depend on the particular data that
-is beign stored. However, as larger and
+is being stored. However, as larger and
 larger amounts of data are stored,
 assuming that a good, uniformly
 distributed hash is used, the real
 distribution of the data should begin
-to closesly approach the theoretical
+to closely approach the theoretical
 distribution.
 
 Hashing
