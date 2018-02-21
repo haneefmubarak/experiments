@@ -28,23 +28,23 @@ static inline size_t matrix (size_t row, size_t col, size_t rows, size_t cols, i
 }
 
 void printarray_lapack_i (const char *s, const lapack_int *i, const int n) {
-	printf ("\nArray %s:\t", s);
+	printf ("\nArray %s:\n", s);
 
 	for (int x = 0; x < n; x++) {
-		printf ("%lli ", i[x]);
+		printf ("%lli\n", i[x]);
 	}
 
-	puts ("\n");
+	puts ("");
 }
 
 void printarray_d (const char *s, const double *d, const int n) {
 	printf ("\nArray %s:\t", s);
 
 	for (int x = 0; x < n; x++) {
-		printf ("%f ", d[x]);
+		printf ("%G\n", d[x]);
 	}
 
-	puts ("\n");
+	puts ("");
 }
 
 void printmatrix_d (const char *s, const double *d, const int rows, const int cols, int layout) {
@@ -52,7 +52,7 @@ void printmatrix_d (const char *s, const double *d, const int rows, const int co
 
 	for (int x = 0; x < rows; x++) {
 		for (int y = 0; y < cols; y++) {
-			printf ("%f\t", d[matrix (x, y, rows, cols, layout)]);
+			printf ("%G\t", d[matrix (x, y, rows, cols, layout)]);
 		}
 
 		puts ("");
@@ -62,13 +62,31 @@ void printmatrix_d (const char *s, const double *d, const int rows, const int co
 }
 
 int main (const int argc, const char **argv) {
-	if ((argc < 2) || !(argc % 2)) {
-		printf ("usage:\t%s x_0 y_0 x_1 y_1 [x_n y_n ...]\n", argv[0]);
+	const int args = 2;
+
+	if ((argc < args) || memcmp (argv[1], "p=", 2)) {
+		printf ("usage:\t%s p=degree x_0 y_0 x_1 y_1 [x_n y_n ...]\n", argv[0]);
 		return 1;
 	}
 
+	const int p = atof (&argv[1][2]) + 1;
+
 	const int n = (argc - 1) / 2;
-	const int p = n;
+
+	if ((argc - args) % 2) {
+		printf ("error: missing a y-value for last x-value [%s]\n",
+			argv[argc - 1]
+		);
+
+		return 1;
+	} else if ((p - 1) >= n) {
+		printf ("error: cannot regress a polynomial of degree %i with only %i values\n",
+			p - 1, n
+		);
+
+		return 1;
+	}
+
 	const int m = p * p;
 	const int s = (p * 2) - 1;
 
@@ -94,7 +112,7 @@ int main (const int argc, const char **argv) {
 	}
 
 	for (int i = 0; i < n; i++) {
-		const int t = (i * 2) + 1;
+		const int t = (i * 2) + args;
 		x[i] = atof (argv[t]);
 		y[i] = atof (argv[t + 1]);
 	}
@@ -132,10 +150,14 @@ int main (const int argc, const char **argv) {
 	printmatrix_d ("mB", mB, p, 1, matrix_layout);
 
 	LAPACKE_dgesv (matrix_layout, p, 1, mA, p, ipiv, mB, p);
-	const double *mX = mB;
+	double *mX = mB;
 
 	printmatrix_d ("mX", mX, p, 1, matrix_layout);
 	printarray_lapack_i ("ipiv", ipiv, p);
+
+	for (int i = 0; i < p; i++) {
+		mX[i] = !mX[i] ? 0 : mX[i];
+	}
 
 	for (int i = 0; i < p; i++) {
 		const int t = ipiv[i], u = t - 1;
